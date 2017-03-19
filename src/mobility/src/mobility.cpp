@@ -64,6 +64,8 @@ float killSwitchTimeout = 10;
 bool targetDetected = false;
 bool targetCollected = false;
 
+float SPIRAL_STEP = .1;
+
 // Set true when the target block is less than targetDist so we continue
 // attempting to pick it up rather than switching to another block in view.
 bool lockTarget = false;
@@ -264,6 +266,19 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         // init code goes here. (code that runs only once at start of
         // auto mode but wont work in main goes here)
         if (!init) {
+	  /*  goalLocation.theta = currentLocation.theta - M_PI;
+		
+		if (goalLocation.theta > 0){
+			goalLocation.x = currentLocation.x + 1;
+			goalLocation.y = currentLocation.y + 1;
+		}
+		
+		else{
+			goalLocation.x = currentLocation.x - 1;
+			goalLocation.y = currentLocation.y - 1;
+		}*/
+            
+
             if (timerTimeElapsed > startDelayInSeconds) {
                 // Set the location of the center circle location in the map
                 // frame based upon our current average location on the map.
@@ -301,6 +316,10 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         // If no adjustment needed, select new goal
         case STATE_MACHINE_TRANSFORM: {
             stateMachineMsg.data = "TRANSFORMING";
+	    SPIRAL_STEP += .1;
+	    if (SPIRAL_STEP >= 1){
+		SPIRAL_STEP = .1;
+				 }
 
             // If returning with a target
             if (targetCollected && !avoidingObstacle) {
@@ -367,7 +386,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             //Otherwise, drop off target and select new random uniform heading
             //If no targets have been detected, assign a new goal
             else if (!targetDetected && timerTimeElapsed > returnToSearchDelay) {
-                goalLocation = searchController.search(currentLocation);
+                goalLocation = searchController.search(currentLocation, SPIRAL_STEP);
             }
 
             //Purposefully fall through to next case without breaking
@@ -579,7 +598,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
             }
 
             // continues an interrupted search
-            goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation);
+            goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, SPIRAL_STEP);
 
             targetDetected = false;
             pickUpController.reset();
@@ -634,7 +653,7 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
         }
 
         // continues an interrupted search
-        goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation);
+        goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, SPIRAL_STEP);
 
         // switch to transform state to trigger collision avoidance
         stateMachineState = STATE_MACHINE_ROTATE;
