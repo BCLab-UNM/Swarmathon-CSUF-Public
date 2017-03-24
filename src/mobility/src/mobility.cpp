@@ -65,7 +65,14 @@ bool targetDetected = false;
 bool targetCollected = false;
 float heartbeat_publish_interval = 2;
 
-float SPIRAL_STEP = .1;
+float spiral_step = .1;
+
+
+struct cubeMemory{
+	geometry_msgs::Pose2D cubeLocation;
+	int numberOfCubes;
+	string roverName;
+};
 
 // Set true when the target block is less than targetDist so we continue
 // attempting to pick it up rather than switching to another block in view.
@@ -323,9 +330,9 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         // If no adjustment needed, select new goal
         case STATE_MACHINE_TRANSFORM: {
             stateMachineMsg.data = "TRANSFORMING";
-	    SPIRAL_STEP += .1;
-	    if (SPIRAL_STEP >= 1){
-		SPIRAL_STEP = .1;
+	    spiral_step += .1;
+	    if (spiral_step >= 1){
+		spiral_step = .1;
 				 }
 
             // If returning with a target
@@ -393,7 +400,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             //Otherwise, drop off target and select new random uniform heading
             //If no targets have been detected, assign a new goal
             else if (!targetDetected && timerTimeElapsed > returnToSearchDelay) {
-                goalLocation = searchController.search(currentLocation, SPIRAL_STEP);
+                goalLocation = searchController.search(currentLocation, spiral_step);
             }
 
             //Purposefully fall through to next case without breaking
@@ -605,7 +612,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
             }
 
             // continues an interrupted search
-            goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, SPIRAL_STEP);
+            goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, spiral_step);
 
             targetDetected = false;
             pickUpController.reset();
@@ -621,7 +628,12 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 
     if (message->detections.size() > 0 && !targetCollected && timerTimeElapsed > 5) {
         targetDetected = true;
-
+	if (message->detections.size() > 1 && !targetCollected && timerTimeElapsed > 5){ // If more than one tag detected, assume there are multiple cubes and remember their location
+		cubeMemory cM;
+		cM.cubeLocation.x = currentLocation.x;
+		cM.cubeLocation.y = currentLocation.y;		
+		cM.numberOfCubes = message->detections.size() - 1;
+		}
         // pickup state so target handler can take over driving.
         stateMachineState = STATE_MACHINE_PICKUP;
         result = pickUpController.selectTarget(message);
@@ -660,7 +672,7 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
         }
 
         // continues an interrupted search
-        goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, SPIRAL_STEP);
+        goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, spiral_step);
 
         // switch to transform state to trigger collision avoidance
         stateMachineState = STATE_MACHINE_ROTATE;
