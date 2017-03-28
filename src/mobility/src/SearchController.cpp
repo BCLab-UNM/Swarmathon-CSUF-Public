@@ -12,11 +12,11 @@ geometry_msgs::Pose2D SearchController::search(geometry_msgs::Pose2D currentLoca
 
   
   //select new heading from Gaussian distribution around current heading
-  goalLocation.theta = currentLocation.theta + .25;
+  goalLocation.theta = currentLocation.theta + .6;
 
   //select new position 50 cm from current location
-  goalLocation.x = currentLocation.x + (0.5 + spiralStep * cos(goalLocation.theta));
-  goalLocation.y = currentLocation.y + (0.5 + spiralStep * sin(goalLocation.theta));
+  goalLocation.x = currentLocation.x + (0.5 * spiralStep * cos(goalLocation.theta));
+  goalLocation.y = currentLocation.y + (0.5 * spiralStep * sin(goalLocation.theta));
   
 
   return goalLocation;
@@ -35,8 +35,8 @@ geometry_msgs::Pose2D SearchController::continueInterruptedSearch(geometry_msgs:
 
   //this of course assumes random walk continuation. Change for diffrent search methods.
   newGoalLocation.theta = oldGoalLocation.theta;
-  newGoalLocation.x = currentLocation.x + (0.5 + spiralStep * cos(oldGoalLocation.theta)); //(remainingGoalDist * cos(oldGoalLocation.theta));
-  newGoalLocation.y = currentLocation.y + (0.5 + spiralStep * sin(oldGoalLocation.theta)); //(remainingGoalDist * sin(oldGoalLocation.theta));
+  newGoalLocation.x = currentLocation.x + (0.5 * spiralStep * cos(oldGoalLocation.theta)); //(remainingGoalDist * cos(oldGoalLocation.theta));
+  newGoalLocation.y = currentLocation.y + (0.5 * spiralStep * sin(oldGoalLocation.theta)); //(remainingGoalDist * sin(oldGoalLocation.theta));
   
 
   return newGoalLocation;

@@ -65,7 +65,7 @@ bool targetDetected = false;
 bool targetCollected = false;
 float heartbeat_publish_interval = 2;
 
-float spiral_step = .1;
+float spiral_step = 1;
 
 
 struct cubeMemory{
@@ -280,18 +280,10 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         // init code goes here. (code that runs only once at start of
         // auto mode but wont work in main goes here)
         if (!init) {
-	  /*  goalLocation.theta = currentLocation.theta - M_PI;
-		
-		if (goalLocation.theta > 0){
-			goalLocation.x = currentLocation.x + 1;
-			goalLocation.y = currentLocation.y + 1;
-		}
-		
-		else{
-			goalLocation.x = currentLocation.x - 1;
-			goalLocation.y = currentLocation.y - 1;
-		}*/
-            
+	   goalLocation.theta = currentLocation.theta - M_PI;
+           goalLocation.x = 1 * cos(goalLocation.theta + M_PI);
+           goalLocation.y = 1 * sin(goalLocation.theta + M_PI);
+
 
             if (timerTimeElapsed > startDelayInSeconds) {
                 // Set the location of the center circle location in the map
@@ -330,9 +322,9 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         // If no adjustment needed, select new goal
         case STATE_MACHINE_TRANSFORM: {
             stateMachineMsg.data = "TRANSFORMING";
-	    spiral_step += .1;
-	    if (spiral_step >= 1){
-		spiral_step = .1;
+	    spiral_step += .2;
+	    if (spiral_step >= 3){
+		spiral_step = 1;
 				 }
 
             // If returning with a target
@@ -562,7 +554,53 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
     // if a target is detected and we are looking for center tags
     if (message->detections.size() > 0 && !reachedCollectionPoint) {
         float cameraOffsetCorrection = 0.020; //meters;
+	stringstream ss; //publish debug stuff
+	int numberOfCubes = 0;
 
+
+		for (int j = 0; j < message->detections.size(); j++)
+	{
+		for (int k = j + 1; k < message->detections.size(); k++)
+		{
+			if (message->detections[j].pose.pose.orientation.y + message->detections[k].pose.pose.orientation.y > 85 && message->detections[j].pose.pose.orientation.y + message->detections[k].pose.pose.orientation.y < 95)
+				{
+				numberOfCubes++;
+				}
+		}
+	}
+
+	ss << "There are " << message->detections.size() - numberOfCubes << " cubes" << "\n";
+    	msg.data = ss.str();
+    	infoLogPublisher.publish(msg);
+
+	for (int i = 0; i < message->detections.size(); i++) 
+		{
+		float testXAngle = message->detections[i].pose.pose.orientation.x;
+    		ss << "tag " << i << " x angle " <<  testXAngle << "\n";
+    		msg.data = ss.str();
+    		infoLogPublisher.publish(msg);
+
+		float testYAngle = message->detections[i].pose.pose.orientation.y;
+    		ss << "tag " << i << " y angle " <<  testYAngle << "\n";
+    		msg.data = ss.str();
+    		infoLogPublisher.publish(msg);
+
+		float testZAngle = message->detections[i].pose.pose.orientation.z;
+    		ss << "tag " << i << " z angle " <<  testZAngle << "\n";
+    		msg.data = ss.str();
+    		infoLogPublisher.publish(msg);
+
+		float testWAngle = message->detections[i].pose.pose.orientation.w;
+    		ss << "tag " << i << " w angle " <<  testWAngle << "\n";
+    		msg.data = ss.str();
+    		infoLogPublisher.publish(msg);
+
+
+		
+		}
+
+
+		
         centerSeen = false;
         double count = 0;
         double countRight = 0;
@@ -668,7 +706,7 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
         // obstacle in front or on left side
         else if (message->data == 2) {
             // select new heading 0.2 radians to the right
-            goalLocation.theta = currentLocation.theta + 0.6;
+            goalLocation.theta = currentLocation.theta - 0.6;
         }
 
         // continues an interrupted search
