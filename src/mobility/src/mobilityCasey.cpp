@@ -1,8 +1,4 @@
 #include <ros/ros.h>
-#include <queue>
-#include <vector>
-#include <cstdlib>
-#include <string>
 
 // ROS libraries
 #include <angles/angles.h>
@@ -57,11 +53,12 @@ geometry_msgs::Pose2D currentLocationMap;
 geometry_msgs::Pose2D currentLocationAverage;
 geometry_msgs::Pose2D goalLocation;
 
+//cube memory
+geometry_msgs::Pose2D cubeLocation;
+
 geometry_msgs::Pose2D centerLocation;
 geometry_msgs::Pose2D centerLocationMap;
 geometry_msgs::Pose2D centerLocationOdom;
-geometry_msgs::Pose2D gpsLocation;
-geometry_msgs::Pose2D cubeLocations;
 
 int currentMode = 0;
 float mobilityLoopTimeStep = 0.1; // time between the mobility loop calls
@@ -72,14 +69,9 @@ bool targetCollected = false;
 float heartbeat_publish_interval = 2;
 
 float spiral_step = 1;
-int forward = 0;
-int stopped = 0;
-int turning = 0;
-int numRovers = 0;
 
-std::vector<string> roverVect; /* Declare a queue for rovers names*/
-std::queue <geometry_msgs::Pose2D> targetQueue; 
-
+//set to true when the rover has a cube rich area in memory
+bool memory = false;
 // Set true when the target block is less than targetDist so we continue
 // attempting to pick it up rather than switching to another block in view.
 bool lockTarget = false;
@@ -139,8 +131,6 @@ ros::Publisher wristAnglePublish;
 ros::Publisher infoLogPublisher;
 ros::Publisher driveControlPublish;
 ros::Publisher heartbeatPublisher;
-ros::Publisher positionCalibratePublish;
-ros::Publisher roverCountPublisher;
 
 // Subscribers
 ros::Subscriber joySubscriber;
@@ -149,9 +139,7 @@ ros::Subscriber targetSubscriber;
 ros::Subscriber obstacleSubscriber;
 ros::Subscriber odometrySubscriber;
 ros::Subscriber mapSubscriber;
-ros::Subscriber navsatSubscriber;
-ros::Subscriber velocitySubscriber;
-ros::Subscriber roverCountSubscriber;
+
 
 // Timers
 ros::Timer stateMachineTimer;
@@ -184,10 +172,6 @@ void mobilityStateMachine(const ros::TimerEvent&);
 void publishStatusTimerEventHandler(const ros::TimerEvent& event);
 void targetDetectedReset(const ros::TimerEvent& event);
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);
-void velocityHandler(const geometry_msgs::Twist::ConstPtr& message );
-void odometryHandlerNav(const nav_msgs::Odometry::ConstPtr& message);
-void roverCountHandler(const std_msgs::String::ConstPtr& strg);
-void targetQueueHandler( void );
 
 int main(int argc, char **argv) {
 
@@ -237,10 +221,7 @@ int main(int argc, char **argv) {
     obstacleSubscriber = mNH.subscribe((publishedName + "/obstacle"), 10, obstacleHandler);
     odometrySubscriber = mNH.subscribe((publishedName + "/odom/filtered"), 10, odometryHandler);
     mapSubscriber = mNH.subscribe((publishedName + "/odom/ekf"), 10, mapHandler);
-    navsatSubscriber = mNH.subscribe((publishedName + "/odom/navsat"), 10, odometryHandlerNav);
-    velocitySubscriber = mNH.subscribe((publishedName + "/velocity"), 10, velocityHandler);   
-    roverCountSubscriber = mNH.subscribe(("count"), 6, roverCountHandler);    
-   
+
     status_publisher = mNH.advertise<std_msgs::String>((publishedName + "/status"), 1, true);
     stateMachinePublish = mNH.advertise<std_msgs::String>((publishedName + "/state_machine"), 1, true);
     fingerAnglePublish = mNH.advertise<std_msgs::Float32>((publishedName + "/fingerAngle/cmd"), 1, true);
@@ -248,15 +229,12 @@ int main(int argc, char **argv) {
     infoLogPublisher = mNH.advertise<std_msgs::String>("/infoLog", 1, true);
     driveControlPublish = mNH.advertise<geometry_msgs::Twist>((publishedName + "/driveControl"), 10);
     heartbeatPublisher = mNH.advertise<std_msgs::String>((publishedName + "/mobility/heartbeat"), 1, true);
-    positionCalibratePublish = mNH.advertise<geometry_msgs::Pose2D>((publishedName + "/calibPos"), 10, true);
-    roverCountPublisher = mNH.advertise<std_msgs::String>(("count"),1, true);
-   
+
     publish_status_timer = mNH.createTimer(ros::Duration(status_publish_interval), publishStatusTimerEventHandler);
     stateMachineTimer = mNH.createTimer(ros::Duration(mobilityLoopTimeStep), mobilityStateMachine);
     targetDetectedTimer = mNH.createTimer(ros::Duration(0), targetDetectedReset, true);
 
     publish_heartbeat_timer = mNH.createTimer(ros::Duration(heartbeat_publish_interval), publishHeartBeatTimerEventHandler);
-
 
     tfListener = new tf::TransformListener();
     std_msgs::String msg;
@@ -299,12 +277,6 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 
         // init code goes here. (code that runs only once at start of
         // auto mode but wont work in main goes here)
-	if (init) {
-	  std_msgs::String rover_message;
-	  rover_message.data = publishedName;
-	  roverCountPublisher.publish(rover_message);
-	}
-
         if (!init) {
 	   goalLocation.theta = currentLocation.theta - M_PI;
            goalLocation.x = 1 * cos(goalLocation.theta + M_PI);
@@ -417,7 +389,10 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             }
             //Otherwise, drop off target and select new random uniform heading
             //If no targets have been detected, assign a new goal
-            else if (!targetDetected && timerTimeElapsed > returnToSearchDelay) {
+            else if (!targetDetected && timerTimeElapsed > returnToSearchDelay && memory) {
+                goalLocation = cubeLocation;
+            }
+	    else if (!targetDetected && timerTimeElapsed > returnToSearchDelay) {
                 goalLocation = searchController.search(currentLocation, spiral_step);
             }
 
@@ -576,15 +551,50 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 
     // If in manual mode do not try to automatically pick up the target
     if (currentMode == 1 || currentMode == 0) return;
-    if (message->detections.size() > 3 && !reachedCollectionPoint) 
-	{
-		targetQueue.push(currentLocation);
-	}
-	
 
     // if a target is detected and we are looking for center tags
     if (message->detections.size() > 0 && !reachedCollectionPoint) {
         float cameraOffsetCorrection = 0.020; //meters;
+	stringstream ss; //publish debug stuff
+	for (int j = 0; j < message->detections.size(); j++){
+	if(message->detections.size() > 3 && message->detections[j].id != 256)
+	{	
+		if (message->detections[j].id == 256)
+		{
+			break;
+		}
+		cubeLocation.x = currentLocation.x;
+		cubeLocation.y = currentLocation.y;
+		memory = true;
+	}
+	}
+	for (int i = 0; i < message->detections.size(); i++) 
+		{
+		float testXAngle = message->detections[i].pose.pose.orientation.x;
+    		ss << "tag " << i << " x angle " <<  testXAngle << "\n";
+    		msg.data = ss.str();
+    		infoLogPublisher.publish(msg);
+
+		float testYAngle = message->detections[i].pose.pose.orientation.y;
+    		ss << "tag " << i << " y angle " <<  testYAngle << "\n";
+    		msg.data = ss.str();
+    		infoLogPublisher.publish(msg);
+
+		float testZAngle = message->detections[i].pose.pose.orientation.z;
+    		ss << "tag " << i << " z angle " <<  testZAngle << "\n";
+    		msg.data = ss.str();
+    		infoLogPublisher.publish(msg);
+
+		float testWAngle = message->detections[i].pose.pose.orientation.w;
+    		ss << "tag " << i << " w angle " <<  testWAngle << "\n";
+    		msg.data = ss.str();
+    		infoLogPublisher.publish(msg);
+
+
+		
+		}
+
+
 		
         centerSeen = false;
         double count = 0;
@@ -651,9 +661,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 
     if (message->detections.size() > 0 && !targetCollected && timerTimeElapsed > 5) {
         targetDetected = true;
-	if (message->detections.size() > 5 && !targetCollected && timerTimeElapsed > 5){ // If more than one tag detected, assume there are multiple cubes and remember their location
-		
-	}
+
         // pickup state so target handler can take over driving.
         stateMachineState = STATE_MACHINE_PICKUP;
         result = pickUpController.selectTarget(message);
@@ -709,12 +717,10 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
 }
 
 void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
-
-  if (forward == 0){
     //Get (x,y) location directly from pose
     currentLocation.x = message->pose.pose.position.x;
     currentLocation.y = message->pose.pose.position.y;
-  }
+
     //Get theta rotation by converting quaternion orientation to pitch/roll/yaw
     tf::Quaternion q(message->pose.pose.orientation.x, message->pose.pose.orientation.y, message->pose.pose.orientation.z, message->pose.pose.orientation.w);
     tf::Matrix3x3 m(q);
@@ -722,16 +728,6 @@ void odometryHandler(const nav_msgs::Odometry::ConstPtr& message) {
     m.getRPY(roll, pitch, yaw);
     currentLocation.theta = yaw;
 }
-
-void odometryHandlerNav(const nav_msgs::Odometry::ConstPtr& message){
-
-    if(forward == 1){
-        currentLocation.x = message->pose.pose.position.x;
-        currentLocation.y = message->pose.pose.position.y;
-        positionCalibratePublish.publish(currentLocation);
-    }
-}
-
 
 void mapHandler(const nav_msgs::Odometry::ConstPtr& message) {
     //Get (x,y) location directly from pose
@@ -851,53 +847,4 @@ void publishHeartBeatTimerEventHandler(const ros::TimerEvent&) {
     std_msgs::String msg;
     msg.data = "";
     heartbeatPublisher.publish(msg);
-}
-
-void velocityHandler(const geometry_msgs::Twist::ConstPtr& message ){
-    if (message->angular.z == 0.0 && message->linear.x == 0.0){
-        stopped = 1;
-        turning = 0;
-        forward = 0;
-    }
-    if (message->linear.x != 0.0){
-        stopped = 0;
-        turning = 0;
-        forward = 1;
-    }
-    if (message->angular.z != 0.0){
-        stopped = 0;
-        turning = 1;
-        forward = 0;
-    }
-}
-
-void roverCountHandler(const std_msgs::String::ConstPtr& strg){
-    //numRovers += 1;
-    int inVect = 0;
-
-    for (int i = 0; i < roverVect.size(); i++){
-        if (roverVect.at(i) == strg->data){
-            inVect = 1;
-        }
-    }
-    if (inVect == 0){
-        numRovers += 1;
-        string name = strg->data;
-
-        roverVect.push_back(name);
-    }
-
-    ROS_INFO_STREAM ("numRovers" << roverVect.size() << " " << publishedName);
-}
-
-void targetQueueHandler(void)
-{
-    
-    
-    //select target to look for
-    ROS_INFO_STREAM ("in queuehandler" );
-    while (targetQueue.size() > 0){
-	
-    }
-
 }
