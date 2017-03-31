@@ -8,15 +8,17 @@ SearchController::SearchController() {
 /**
  * This code implements a basic random walk search.
  */
-geometry_msgs::Pose2D SearchController::search(geometry_msgs::Pose2D currentLocation, float spiralStep, queue &q) {
+geometry_msgs::Pose2D SearchController::search(geometry_msgs::Pose2D currentLocation, float spiralStep, std::queue<geometry_msgs::Pose2D> &q) {
   geometry_msgs::Pose2D goalLocation;
 
   if (q.size() > 0)
 	{
-		geometry_msgs::Pose2D mem = q.pop();
+		geometry_msgs::Pose2D mem = q.front();
+		q.pop();
 		goalLocation.x = mem.x;
 		goalLocation.y = mem.y;
 		goalLocation.theta = atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x);
+		return goalLocation;
 	}
   //select new heading from Gaussian distribution around current heading
   goalLocation.theta = currentLocation.theta + .6;
@@ -33,7 +35,7 @@ geometry_msgs::Pose2D SearchController::search(geometry_msgs::Pose2D currentLoca
  * Continues search pattern after interruption. For example, avoiding the
  * center or collisions.
  */
-geometry_msgs::Pose2D SearchController::continueInterruptedSearch(geometry_msgs::Pose2D currentLocation, geometry_msgs::Pose2D oldGoalLocation, float spiralStep) {
+geometry_msgs::Pose2D SearchController::continueInterruptedSearch(geometry_msgs::Pose2D currentLocation, geometry_msgs::Pose2D oldGoalLocation, float spiralStep, std::queue<geometry_msgs::Pose2D> &q) {
   geometry_msgs::Pose2D newGoalLocation;
   
 
@@ -42,9 +44,8 @@ geometry_msgs::Pose2D SearchController::continueInterruptedSearch(geometry_msgs:
 
   //this of course assumes random walk continuation. Change for diffrent search methods.
   newGoalLocation.theta = oldGoalLocation.theta;
-  newGoalLocation.x = currentLocation.x + (0.5 * spiralStep * cos(oldGoalLocation.theta)); //(remainingGoalDist * cos(oldGoalLocation.theta));
-  newGoalLocation.y = currentLocation.y + (0.5 * spiralStep * sin(oldGoalLocation.theta)); //(remainingGoalDist * sin(oldGoalLocation.theta));
-  
+  newGoalLocation.x = oldGoalLocation.x;
+  newGoalLocation.y = oldGoalLocation.y;
 
   return newGoalLocation;
 }

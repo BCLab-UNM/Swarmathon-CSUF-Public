@@ -193,7 +193,7 @@ int main(int argc, char **argv) {
 
     gethostname(host, sizeof (host));
     string hostname(host);
-
+/*
     // instantiate random number generator
     rng = new random_numbers::RandomNumberGenerator();
 
@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
     //select initial search position 50 cm from center (0,0)
     goalLocation.x = 0.5 * cos(goalLocation.theta+M_PI);
     goalLocation.y = 0.5 * sin(goalLocation.theta+M_PI);
-
+*/
     centerLocation.x = 0;
     centerLocation.y = 0;
     centerLocationOdom.x = 0;
@@ -348,8 +348,8 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         // If no adjustment needed, select new goal
         case STATE_MACHINE_TRANSFORM: {
             stateMachineMsg.data = "TRANSFORMING";
-	    spiral_step += .2;
-	    if (spiral_step >= 3){
+	    spiral_step += .25;
+	    if (spiral_step >= 5){
 		spiral_step = 1;
 				 }
 
@@ -418,7 +418,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
             //Otherwise, drop off target and select new random uniform heading
             //If no targets have been detected, assign a new goal
             else if (!targetDetected && timerTimeElapsed > returnToSearchDelay) {
-                goalLocation = searchController.search(currentLocation, spiral_step);
+                goalLocation = searchController.search(currentLocation, spiral_step, targetQueue);
             }
 
             //Purposefully fall through to next case without breaking
@@ -518,7 +518,7 @@ void mobilityStateMachine(const ros::TimerEvent&) {
 
                     // set center as goal position
                     goalLocation.x = centerLocationOdom.x = 0;
-                    goalLocation.y = centerLocationOdom.y;
+                    goalLocation.y = centerLocationOdom.y = 0;
 
                     // lower wrist to avoid ultrasound sensors
                     std_msgs::Float32 angle;
@@ -576,10 +576,22 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
 
     // If in manual mode do not try to automatically pick up the target
     if (currentMode == 1 || currentMode == 0) return;
-    if (message->detections.size() > 3 && !reachedCollectionPoint) 
+
+    if (!reachedCollectionPoint && message->detections.size() > 3) 
 	{
+	if (targetQueue.size() == 0)
+		{
 		targetQueue.push(currentLocation);
-	}
+      		}
+      	else 
+	{
+		geometry_msgs::Pose2D compareTarget = targetQueue.front();
+		if ((fabs(compareTarget.x) - fabs(currentLocation.x) > 5) && (fabs(compareTarget.y) - fabs(currentLocation.y) > 5))
+		{
+	  		targetQueue.push(currentLocation);
+		}
+	}}
+	
 	
 
     // if a target is detected and we are looking for center tags
@@ -635,7 +647,7 @@ void targetHandler(const apriltags_ros::AprilTagDetectionArray::ConstPtr& messag
             }
 
             // continues an interrupted search
-            goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, spiral_step);
+            goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, spiral_step, targetQueue);
 
             targetDetected = false;
             pickUpController.reset();
@@ -692,7 +704,7 @@ void obstacleHandler(const std_msgs::UInt8::ConstPtr& message) {
         }
 
         // continues an interrupted search
-        goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, spiral_step);
+        goalLocation = searchController.continueInterruptedSearch(currentLocation, goalLocation, spiral_step, targetQueue);
 
         // switch to transform state to trigger collision avoidance
         stateMachineState = STATE_MACHINE_ROTATE;

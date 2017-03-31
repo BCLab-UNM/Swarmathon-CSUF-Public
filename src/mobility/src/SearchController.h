@@ -3,6 +3,7 @@
 
 #include <geometry_msgs/Pose2D.h>
 #include <random_numbers/random_numbers.h>
+#include<queue>
 
 /**
  * This class implements the search control algorithm for the rovers. The code
@@ -15,10 +16,10 @@ class SearchController {
     SearchController();
 
     // performs search pattern
-    geometry_msgs::Pose2D search(geometry_msgs::Pose2D currentLocation, float spiralStep);
+    geometry_msgs::Pose2D search(geometry_msgs::Pose2D currentLocation, float spiralStep, std::queue<geometry_msgs::Pose2D> &q);
 
     // continues search pattern after interruption
-    geometry_msgs::Pose2D continueInterruptedSearch(geometry_msgs::Pose2D currentLocation, geometry_msgs::Pose2D oldGoalLocation, float spiralStep);
+    geometry_msgs::Pose2D continueInterruptedSearch(geometry_msgs::Pose2D currentLocation, geometry_msgs::Pose2D oldGoalLocation, float spiralStep, std::queue<geometry_msgs::Pose2D> &q);
 
   private:
 
