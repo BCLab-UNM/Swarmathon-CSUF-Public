@@ -71,7 +71,7 @@ bool targetDetected = false;
 bool targetCollected = false;
 float heartbeat_publish_interval = 2;
 
-float spiral_step = 1;
+float spiral_step = 3;
 int forward = 0;
 int stopped = 0;
 int turning = 0;
@@ -317,6 +317,28 @@ void mobilityStateMachine(const ros::TimerEvent&) {
                 centerLocationMap.x = currentLocationAverage.x;
                 centerLocationMap.y = currentLocationAverage.y;
                 centerLocationMap.theta = currentLocationAverage.theta;
+		
+
+		/*
+		stringstream ss;
+    		ss << "center Location map.x is " << centerLocationMap.x << "\n";
+    		msg.data = ss.str();
+    		ss << "current Location x is " << currentLocation.x << "\n";
+    		msg.data = ss.str();
+
+		
+    		ss << "center Location map.y is " << centerLocationMap.y << "\n";
+    		msg.data = ss.str();
+    		ss << "current Location y is " << currentLocation.y << "\n";
+    		msg.data = ss.str();
+
+		
+    		ss << "center Location map.theta is " << centerLocationMap.theta << "\n";
+    		msg.data = ss.str();
+    		
+		ss << "current Location theta is " << currentLocation.theta << "\n";
+    		msg.data = ss.str();
+		infoLogPublisher.publish(msg); */
 
                 // initialization has run
                 init = true;
@@ -348,10 +370,14 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         // If no adjustment needed, select new goal
         case STATE_MACHINE_TRANSFORM: {
             stateMachineMsg.data = "TRANSFORMING";
-	    spiral_step += .25;
-	    if (spiral_step >= 5){
-		spiral_step = 1;
-				 }
+	    spiral_step += .2;
+	    if (spiral_step >= 4){
+		spiral_step = .2;
+		}
+	stringstream s1;		 
+	s1 << "current spiral step is " << spiral_step << "\n";
+    	msg.data = s1.str();
+	infoLogPublisher.publish(msg);
 
             // If returning with a target
             if (targetCollected && !avoidingObstacle) {
@@ -449,20 +475,23 @@ void mobilityStateMachine(const ros::TimerEvent&) {
         // Drive forward
         // Stay in this state until angle is at least PI/2
         case STATE_MACHINE_SKID_STEER: {
+	    float dist = std::sqrt((currentLocation.x - goalLocation.x) * (currentLocation.x - goalLocation.x) + (currentLocation.y - 		   		    currentLocation.y) * (currentLocation.y - currentLocation.y));
+
             stateMachineMsg.data = "SKID_STEER";
 
             // calculate the distance between current and desired heading in radians
             float errorYaw = angles::shortest_angular_distance(currentLocation.theta, goalLocation.theta);
 
             // goal not yet reached drive while maintaining proper heading.
-            if (fabs(angles::shortest_angular_distance(currentLocation.theta, atan2(goalLocation.y - currentLocation.y, goalLocation.x - currentLocation.x))) < M_PI_2) {
+            if (fabs(angles::shortest_angular_distance(currentLocation.theta, atan2(goalLocation.y - currentLocation.y, goalLocation.x - 			currentLocation.x))) < M_PI_2) {
                 // drive and turn simultaniously
                 sendDriveCommand(searchVelocity, errorYaw/2);
             }
+	
             // goal is reached but desired heading is still wrong turn only
             else if (fabs(angles::shortest_angular_distance(currentLocation.theta, goalLocation.theta)) > 0.1) {
                  // rotate but dont drive
-                sendDriveCommand(0.0, errorYaw);
+                sendDriveCommand(0.05, errorYaw);
             }
             else {
                 // stop
@@ -517,8 +546,8 @@ void mobilityStateMachine(const ros::TimerEvent&) {
                     goalLocation.theta = atan2(centerLocationOdom.y - currentLocation.y, centerLocationOdom.x - currentLocation.x);
 
                     // set center as goal position
-                    goalLocation.x = centerLocationOdom.x = 0;
-                    goalLocation.y = centerLocationOdom.y = 0;
+                    goalLocation.x = centerLocationOdom.x;
+                    goalLocation.y = centerLocationOdom.y;
 
                     // lower wrist to avoid ultrasound sensors
                     std_msgs::Float32 angle;
@@ -767,7 +796,7 @@ void joyCmdHandler(const sensor_msgs::Joy::ConstPtr& message) {
 
 void publishStatusTimerEventHandler(const ros::TimerEvent&) {
     std_msgs::String msg;
-    msg.data = "online";
+    msg.data = "Fayetteville State University";
     status_publisher.publish(msg);
 }
 

@@ -21,11 +21,11 @@ geometry_msgs::Pose2D SearchController::search(geometry_msgs::Pose2D currentLoca
 		return goalLocation;
 	}
   //select new heading from Gaussian distribution around current heading
-  goalLocation.theta = currentLocation.theta + .6;
+  goalLocation.theta = currentLocation.theta + .5;
 
   //select new position 50 cm from current location
-  goalLocation.x = currentLocation.x + (0.5 * spiralStep * cos(goalLocation.theta));
-  goalLocation.y = currentLocation.y + (0.5 * spiralStep * sin(goalLocation.theta));
+  goalLocation.x = currentLocation.x + (.5 * spiralStep * cos(goalLocation.theta));
+  goalLocation.y = currentLocation.y + (.5 * spiralStep * sin(goalLocation.theta));
   
 
   return goalLocation;
