@@ -1,14 +1,17 @@
 #include "SearchController.h"
 #include <angles/angles.h>
+#include<math.h>
 
 SearchController::SearchController() {
   rng = new random_numbers::RandomNumberGenerator();
   currentLocation.x = 0;
   currentLocation.y = 0;
+  currentLocation.r = 0;
   currentLocation.theta = 0;
 
   centerLocation.x = 0;
   centerLocation.y = 0;
+  centerLocation.r = 0;
   centerLocation.theta = 0;
   result.PIDMode = FAST_PID;
 
@@ -52,15 +55,22 @@ Result SearchController::DoWork() {
     {
       first_waypoint = false;
       searchLocation.theta = currentLocation.theta + M_PI;
-      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
+      searchLocation.r = 2 + 2*cos(2*searchLocation.theta);
+     // searchLocation.x = currentLocation.x + (2 + (2 * cos(searchLocation.theta)));
+     // searchLocation.y = currentLocation.y + (2 + (2 * cos(searchLocation.theta)));
+      searchLocation.x = sqrt(searchLocation.r * searchLocation.r - currentLocation.y * currentLocation.y);
+      searchLocation.y = sqrt(searchLocation.r * searchLocation.r - currentLocation.x * currentLocation.x);
+
     }
     else
     {
       //select new heading from Gaussian distribution around current heading
-      searchLocation.theta = rng->gaussian(currentLocation.theta, 0.785398); //45 degrees in radians
-      searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-      searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
+      searchLocation.theta = rng->gaussian(currentLocation.theta, 0.7854); //45 degrees in radians****
+      searchLocation.r = 2 + 2*cos(2*searchLocation.theta);
+     // searchLocation.x = currentLocation.x + (2 + (2 * cos(searchLocation.theta)));
+     // searchLocation.y = currentLocation.y + (2 + (2 * cos(searchLocation.theta)));
+      searchLocation.x = sqrt(searchLocation.r * searchLocation.r - currentLocation.y * currentLocation.y);
+      searchLocation.y = sqrt(searchLocation.r * searchLocation.r - currentLocation.x * currentLocation.x);
     }
 
     result.wpts.waypoints.clear();
