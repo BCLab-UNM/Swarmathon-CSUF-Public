@@ -5,7 +5,6 @@
 struct Point {
   float x;
   float y;
-  float r;
   float theta;
 };
 
