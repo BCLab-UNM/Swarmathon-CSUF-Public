@@ -1,8 +1,9 @@
 #include "SearchController.h"
 #include <angles/angles.h>
 
+float locationCounter = 0;
 SearchController::SearchController() {
-  //rng = new random_numbers::RandomNumberGenerator();
+  rng = new random_numbers::RandomNumberGenerator();
   currentLocation.x = 0;
   currentLocation.y = 0;
   currentLocation.theta = 0;
@@ -24,61 +25,48 @@ void SearchController::Reset() {
  * This code implements a basic random walk search.
  */
 Result SearchController::DoWork() {
-
-  if (!result.wpts.waypoints.empty()) {
-    if (hypot(result.wpts.waypoints[0].x-currentLocation.x, result.wpts.waypoints[0].y-currentLocation.y) < 0.15) {
-      attemptCount = 0;
-    }
-  }
-
-  if (attemptCount > 0 && attemptCount < 5) {
-    attemptCount++;
-    if (succesfullPickup) {
-      succesfullPickup = false;
-      attemptCount = 1;
-    }
-    return result;
-  }
-  else if (attemptCount >= 5 || attemptCount == 0) 
-  {
-    attemptCount = 1;
-
-
     result.type = waypoint;
-    Point  searchLocation;
-
-    //select new position 50 cm from current location
-    first_waypoint = false ;
-    searchLocation.theta = currentLocation + M_PI;
-
-      //osearchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-    searchLocation.x = currentLocation.x + searchLocation.theta;
-
-      //osearchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
-    searchLocation.y = currentLocation.y + searchLocation.theta;
-
-
-
-    {
-      //select new heading from Gaussian distribution around current heading
-      //searchLocation.theta = rng->gaussian(currentLocation.theta, 0.785398); //45 degrees in radians
-
-       searchLocation.theta = currentLocation.theta + M_PI;
-
-       searchLocation.x = currentLocation.x + (0.5 * cos(searchLocation.theta));
-
-       searchLocation.y = currentLocation.y + (0.5 * sin(searchLocation.theta));
-
-
-
-    }
-
-    result.wpts.waypoints.clear();
-    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation);
     
+    // Create 4 searchLocations, which are each of type Point
+    Point  searchLocation1, searchLocation2, searchLocation3, searchLocation4;
+    
+    // locationCounter is used to change the square size
+    // if you set locationCounter to some static value the square will be that size
+    
+    
+    // Point 1 of the Square
+    searchLocation1.x = centerLocation.x + locationCounter;
+    searchLocation1.y = centerLocation.y + locationCounter;
+    // Point 2 of the Square
+    searchLocation2.x = centerLocation.x - locationCounter;
+    searchLocation2.y = centerLocation.y + locationCounter;
+    // Point 3 of the Square
+    searchLocation3.x = centerLocation.x - locationCounter;
+    searchLocation3.y = centerLocation.y - locationCounter;
+    // Point 4 of the Square
+    searchLocation4.x = centerLocation.x + locationCounter; 
+    searchLocation4.y = centerLocation.y - locationCounter;
+    
+    // result.wpts.waypoints.clear() removes anything that is in the vector
+    result.wpts.waypoints.clear();
+    
+    // incrementing locationCounter for each square completion
+    locationCounter++;
+    if (locationCounter >= 6){
+        locationCounter = 0;
+    }
+    
+    // This adds the corresponding locations to result at the given index.
+    // result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation1)
+    //    this will insert searchLocation1 at the beginning of the vector result
+    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation1);
+    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation2);
+    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation3);
+    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocation4);
+    
+    // Return result will send 'result' to the ROSAdapter which will then execute
+    //    Whatever its told by result.
     return result;
-  }
-
 }
 
 void SearchController::SetCenterLocation(Point centerLocation) {
