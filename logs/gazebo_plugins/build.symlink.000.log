@@ -1,0 +1,6 @@
+Symlinking /home/cspooner/Swarmathon-FSU/devel/share/gazebo_plugins/cmake/gazebo_pluginsConfig.cmake
+Symlinking /home/cspooner/Swarmathon-FSU/devel/share/gazebo_plugins/cmake/gazebo_pluginsConfig-version.cmake
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/libgazebo_plugins_score.so
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/libgazebo_plugins_gripper.so
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/libgazebo_plugins.so
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/pkgconfig/gazebo_plugins.pc
