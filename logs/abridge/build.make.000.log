@@ -1,0 +1,5 @@
+[35m[1mScanning dependencies of target abridge[0m
+[ 33%] [32mBuilding CXX object CMakeFiles/abridge.dir/src/abridge.cpp.o[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/abridge.dir/src/usbSerial.cpp.o[0m
+[100%] [32m[1mLinking CXX executable /home/cspooner/Swarmathon-FSU/devel/.private/abridge/lib/abridge/abridge[0m
+[100%] Built target abridge
