@@ -1,0 +1,5 @@
+Symlinking /home/cspooner/Swarmathon-FSU/devel/share/usb_cam/cmake/usb_camConfig-version.cmake
+Symlinking /home/cspooner/Swarmathon-FSU/devel/share/usb_cam/cmake/usb_camConfig.cmake
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/libusb_cam.so
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/usb_cam/usb_cam_node
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/pkgconfig/usb_cam.pc
