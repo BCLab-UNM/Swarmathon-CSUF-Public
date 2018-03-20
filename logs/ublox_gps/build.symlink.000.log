@@ -1,0 +1,5 @@
+Symlinking /home/cspooner/Swarmathon-FSU/devel/share/ublox_gps/cmake/ublox_gpsConfig.cmake
+Symlinking /home/cspooner/Swarmathon-FSU/devel/share/ublox_gps/cmake/ublox_gpsConfig-version.cmake
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/libublox_gps.so
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/ublox_gps/ublox_gps
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/pkgconfig/ublox_gps.pc
