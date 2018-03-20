@@ -1,108 +1,144 @@
 #include "ObstacleController.h"
 
 ObstacleController::ObstacleController()
-{
-  obstacleAvoided = true;
-  obstacleDetected = false;
-  obstacleInterrupt = false;
-  result.PIDMode = CONST_PID; //use the const PID to turn at a constant speed
-}
-
-
+  {
+  obstacleAvoided = true; obstacleDetected = false;
+  obstacleInterrupt = false; result.PIDMode = CONST_PID; //use the const PID to turn at a constant speed
+  }
 //note, not a full reset as this could cause a bad state
 //resets the interupt and knowledge of an obstacle or obstacle avoidance only.
-void ObstacleController::Reset() {
-  obstacleAvoided = true;
-  obstacleDetected = false;
-  obstacleInterrupt = false;
-  delay = current_time;
-}
+void ObstacleController::Reset() 
+  {
+  obstacleAvoided = true; obstacleDetected = false;
+  obstacleInterrupt = false; delay = current_time;
+  }
 
 // Avoid crashing into objects detected by the ultraound
-void ObstacleController::avoidObstacle() {
-  
-    //always turn left to avoid obstacles
-    if (right < 0.8 || center < 0.8 || left < 0.8) {
-      result.type = precisionDriving;
+void ObstacleController::avoidObstacle() 
+  {  
+    
+    //if any sensor detects an obstacle closer than .5 meters then it decides what to do
+    if (right < 0.6 || center < 0.6 || left < 0.6)
+	{
+        //if obstacle is closest to right sensor then robot takes approx. a 57 degree left turn
+	if(right < 0.6 && center > 0.6 && left > 0.6)
+		{
+		result.type = precisionDriving;
+        	result.pd.cmdAngular = -K_angular;
+       		result.pd.setPointVel = 0.0;
+       		result.pd.cmdVel = 0.0;
+        	result.pd.setPointYaw = 0;
+		}
+        //if obstacle is closest to the center then the robot will reverse slightly then complete a 180 degree turn around
+	else if(center < 0.6 && right > 0.6 && left > 0.6)
+		{
+        	result.type = precisionDriving;
+        	result.pd.cmdAngular = K_angularReverse;
+        	result.pd.setPointVel = 0.0;
+        	result.pd.cmdVel = 0.0;
+        	result.pd.setPointYaw = 0;
+        	}
+        //if obstacle is closest to the left sensor than the robot will take a 57 degree turn to the right to avoid obstacle
+	else if(left < 0.6 && right > 0.6 && center > 0.6)
+		{
+        	result.type = precisionDriving;
+        	result.pd.cmdAngular = K_angular;
+        	result.pd.setPointVel = 0.0;
+        	result.pd.cmdVel = 0.0;
+        	result.pd.setPointYaw = 0;
+        	}
+        //if obstacle is closest to both the right and center sensor then robot will take a 90 degree turn to the left
+	else if(right < 0.6 && center < 0.6 && left > 0.6)
+		{
+        	result.type = precisionDriving;
+        	result.pd.cmdAngular = -K_angularHard;
+        	result.pd.setPointVel = 0.0;
+        	result.pd.cmdVel = 0.0;
+        	result.pd.setPointYaw = 0;
+        	}
+        //if obstacle is closest to both the center and the left then robot will take a 90 degree turn to the right
+	else if(center < 0.6 && left < 0.6 && right > 0.6)
+		{
+        	result.type = precisionDriving;
+        	result.pd.cmdAngular = K_angularHard;
+        	result.pd.setPointVel = 0.0;
+        	result.pd.cmdVel = 0.0;
+        	result.pd.setPointYaw = 0;
+        	}
+        //if all sensors read less than .5 then the robot will reverse slightly and turn around 180 degrees
+	else if(left < 0.6 && right < 0.6 && center < 0.6)
+		{
+        	result.type = precisionDriving;
+        	result.pd.cmdAngular = K_angularReverse;
+        	result.pd.setPointVel = 0.0;
+        	result.pd.cmdVel = 0.0;
+        	result.pd.setPointYaw = 0;
+        	}
+	}
 
-      result.pd.cmdAngular = -K_angular;
-
-      result.pd.setPointVel = 0.0;
-      result.pd.cmdVel = 0.0;
-      result.pd.setPointYaw = 0;
-    }
 }
+
+
+
+
 
 // A collection zone was seen in front of the rover and we are not carrying a target
 // so avoid running over the collection zone and possibly pushing cubes out.
-void ObstacleController::avoidCollectionZone() {
-  
+void ObstacleController::avoidCollectionZone() 
+  {  
     result.type = precisionDriving;
-
     result.pd.cmdVel = 0.0;
-
     // Decide which side of the rover sees the most april tags and turn away
     // from that side
-    if(count_left_collection_zone_tags < count_right_collection_zone_tags) {
+    if(count_left_collection_zone_tags < count_right_collection_zone_tags)
+      {
       result.pd.cmdAngular = K_angular;
-    } else {
-      result.pd.cmdAngular = -K_angular;
-    }
+      } 
+    else {result.pd.cmdAngular = -K_angular;}
 
     result.pd.setPointVel = 0.0;
     result.pd.cmdVel = 0.0;
     result.pd.setPointYaw = 0;
-}
+  }
 
-
-Result ObstacleController::DoWork() {
-
-  clearWaypoints = true;
-  set_waypoint = true;
-  result.PIDMode = CONST_PID;
-
+Result ObstacleController::DoWork() 
+  {
+    clearWaypoints = true;
+    set_waypoint = true;
+    result.PIDMode = CONST_PID;
   // The obstacle is an april tag marking the collection zone
-  if(collection_zone_seen){
-    avoidCollectionZone();
-  }
-  else {
-    avoidObstacle();
-  }
-
+  if(collection_zone_seen){avoidCollectionZone();}
+  else {avoidObstacle();}
   //if an obstacle has been avoided
-  if (can_set_waypoint) {
-
+  if (can_set_waypoint) 
+    {
     can_set_waypoint = false; //only one waypoint is set
     set_waypoint = false;
     clearWaypoints = false;
-
     result.type = waypoint; 
     result.PIDMode = FAST_PID; //use fast pid for waypoints
     Point forward;            //waypoint is directly ahead of current heading
-    forward.x = currentLocation.x + (0.5 * cos(currentLocation.theta));
-    forward.y = currentLocation.y + (0.5 * sin(currentLocation.theta));
+    forward.x = currentLocation.x + (0.7 * cos(currentLocation.theta));
+    forward.y = currentLocation.y + (0.7 * sin(currentLocation.theta));
     result.wpts.waypoints.clear();
     result.wpts.waypoints.push_back(forward);
-  }
-
+    }
   return result;
 }
 
 
-void ObstacleController::setSonarData(float sonarleft, float sonarcenter, float sonarright) {
+void ObstacleController::setSonarData(float sonarleft, float sonarcenter, float sonarright) 
+  {
   left = sonarleft;
   right = sonarright;
   center = sonarcenter;
-
   ProcessData();
-}
+  }
 
-void ObstacleController::setCurrentLocation(Point currentLocation) {
-  this->currentLocation = currentLocation;
-}
+void ObstacleController::setCurrentLocation(Point currentLocation) {this->currentLocation = currentLocation;}
 
-void ObstacleController::ProcessData() {
-
+void ObstacleController::ProcessData() 
+  {
   //timeout timer for no tag messages
   //this is used to set collection zone seen to false beacuse
   //there is no report of 0 tags seen
@@ -118,27 +154,19 @@ void ObstacleController::ProcessData() {
   }
 
   //If we are ignoring the center sonar
-  if(ignore_center_sonar){
+  if(ignore_center_sonar)
+    {
     //If the center distance is longer than the reactivation threshold 
-    if(center > reactivate_center_sonar_threshold){
-      //currently do not re-enable the center sonar instead ignore it till the block is dropped off
-      //ignore_center_sonar = false; //look at sonar again beacuse center ultrasound has gone long
+    if(center > reactivate_center_sonar_threshold){ignore_center_sonar = false;}
+    else{center = 3;}
     }
-    else{
-      //set the center distance to "max" to simulated no obstacle
-      center = 3;
-    }
-  }
-  else {
+  else 
+    {
     //this code is to protect against a held block causing a false short distance
     //currently pointless due to above code
-    if (center < 3.0) {
-      result.wristAngle = 0.7;
+    if (center < 3.0) {result.wristAngle = 0.7;}
+    else {result.wristAngle = -1;}
     }
-    else {
-      result.wristAngle = -1;
-    }
-  }
 
   //if any sonar is below the trigger distance set physical obstacle true
   if (left < triggerDistance || right < triggerDistance || center < triggerDistance)
@@ -241,35 +269,29 @@ bool ObstacleController::HasWork() {
 }
 
 //ignore center ultrasound
-void ObstacleController::setIgnoreCenterSonar(){
-  ignore_center_sonar = true; 
-}
-
-void ObstacleController::setCurrentTimeInMilliSecs( long int time )
-{
-  current_time = time;
-}
-
-void ObstacleController::setTargetHeld() {
+void ObstacleController::setIgnoreCenterSonar(){ignore_center_sonar = true;}
+void ObstacleController::setCurrentTimeInMilliSecs( long int time ){current_time = time;}
+void ObstacleController::setTargetHeld() 
+  {
   targetHeld = true;
-
   //adjust current state on transition from no cube held to cube held
-  if (previousTargetState == false) {
+  if (previousTargetState == false) 
+    {
     obstacleAvoided = true;
     obstacleInterrupt = false;
     obstacleDetected = false;
     previousTargetState = true;
-  }
-}
+    }
+   }
 
 void ObstacleController::setTargetHeldClear()
-{
+  {
   //adjust current state on transition from cube held to cube not held
   if (targetHeld)
-  {
+    {
     Reset();
     targetHeld = false;
     previousTargetState = false;
     ignore_center_sonar = false;
+    }
   }
-}

@@ -54,10 +54,10 @@ enum BehaviorTrigger {
 };
 
 struct PrecisionDriving {
-  float cmdVel = 0.0; //velocity command
+  float cmdVel = 1.0; //velocity command
   float cmdAngularError = 0.0; //for the current error
-  float cmdAngular = 0.0; //for const pid, angular target speed
-  float setPointVel = 0.0; //set this to the target speed 
+  float cmdAngular = 1.0; //for const pid, angular target speed
+  float setPointVel = 1.0; //set this to the target speed 
   float setPointYaw = 0.0; //set this to either the target heading or 0
 
   float left = 0.0; //this is used by drive controller to pass PWM to ROSAdapter

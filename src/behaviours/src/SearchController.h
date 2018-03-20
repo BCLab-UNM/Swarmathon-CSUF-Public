@@ -3,7 +3,7 @@
 
 #include <random_numbers/random_numbers.h>
 #include "Controller.h"
-
+#include <cstdlib>
 /**
  * This class implements the search control algorithm for the rovers. The code
  * here should be modified and enhanced to improve search performance.
@@ -37,6 +37,7 @@ private:
   Point currentLocation;
   Point centerLocation;
   Point searchLocation;
+  Point homeBase;
   int attemptCount = 0;
   //struct for returning data to ROS adapter
   Result result;
@@ -46,5 +47,7 @@ private:
   bool first_waypoint = true;
   bool succesfullPickup = false;
 };
+
+
 
 #endif /* SEARCH_CONTROLLER */
