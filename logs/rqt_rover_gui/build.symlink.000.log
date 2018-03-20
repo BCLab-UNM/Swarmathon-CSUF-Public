@@ -1,0 +1,5 @@
+Symlinking /home/cspooner/Swarmathon-FSU/devel/share/rqt_rover_gui/cmake/rqt_rover_guiConfig-version.cmake
+Symlinking /home/cspooner/Swarmathon-FSU/devel/share/rqt_rover_gui/cmake/rqt_rover_guiConfig.cmake
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/librqt_rover_gui.so
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/python2.7/dist-packages/rqt_rover_gui/__init__.py
+Symlinking /home/cspooner/Swarmathon-FSU/devel/lib/pkgconfig/rqt_rover_gui.pc

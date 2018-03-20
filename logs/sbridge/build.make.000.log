@@ -1,0 +1,5 @@
+[35m[1mScanning dependencies of target sbridge[0m
+[ 33%] [32mBuilding CXX object CMakeFiles/sbridge.dir/src/main.cpp.o[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/sbridge.dir/src/sbridge.cpp.o[0m
+[100%] [32m[1mLinking CXX executable /home/cspooner/Swarmathon-FSU/devel/.private/sbridge/lib/sbridge/sbridge[0m
+[100%] Built target sbridge

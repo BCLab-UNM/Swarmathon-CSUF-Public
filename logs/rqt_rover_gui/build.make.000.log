@@ -1,0 +1,120 @@
+[35m[1mScanning dependencies of target ublox_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target swarmie_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target swarmie_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target nodelet_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target swarmie_msgs_generate_messages_lisp[0m
+[  0%] Built target std_msgs_generate_messages_eus
+[  0%] Built target ublox_msgs_generate_messages_py
+[  0%] Built target swarmie_msgs_generate_messages_nodejs
+[  0%] Built target nodelet_generate_messages_cpp
+[  0%] Built target swarmie_msgs_generate_messages_eus
+[  0%] Built target swarmie_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target roscpp_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target ublox_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_py[0m
+[35m[1mScanning dependencies of target roscpp_generate_messages_nodejs[0m
+[  0%] Built target roscpp_generate_messages_lisp
+[  0%] Built target rosgraph_msgs_generate_messages_py
+[  0%] Built target rosgraph_msgs_generate_messages_lisp
+[  0%] Built target ublox_msgs_generate_messages_eus
+[  0%] Built target roscpp_generate_messages_nodejs
+[  0%] Built target std_msgs_generate_messages_py
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_lisp[0m
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target nodelet_generate_messages_lisp[0m
+[  0%] Built target rosgraph_msgs_generate_messages_nodejs
+[  0%] Built target std_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target bond_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_lisp[0m
+[  0%] Built target nodelet_generate_messages_lisp
+[  0%] Built target rosgraph_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target bond_generate_messages_py[0m
+[  0%] Built target bond_generate_messages_cpp
+[35m[1mScanning dependencies of target ublox_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target nodelet_generate_messages_py[0m
+[  0%] Built target geometry_msgs_generate_messages_lisp
+[  0%] Built target bond_generate_messages_py
+[35m[1mScanning dependencies of target roscpp_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target swarmie_msgs_generate_messages_cpp[0m
+[  0%] Built target ublox_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target rosgraph_msgs_generate_messages_eus[0m
+[  0%] Built target roscpp_generate_messages_cpp
+[  0%] Built target nodelet_generate_messages_py
+[  0%] Built target swarmie_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target roscpp_generate_messages_py[0m
+[  0%] Built target rosgraph_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target swarmie_msgs_generate_messages_py[0m
+[  0%] Built target geometry_msgs_generate_messages_nodejs
+[35m[1mScanning dependencies of target nodelet_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target roscpp_generate_messages_eus[0m
+[  0%] Built target roscpp_generate_messages_py
+[35m[1mScanning dependencies of target bond_generate_messages_eus[0m
+[  0%] Built target swarmie_msgs_generate_messages_py
+[35m[1mScanning dependencies of target bond_generate_messages_lisp[0m
+[  0%] Built target nodelet_generate_messages_nodejs
+[  0%] Built target roscpp_generate_messages_eus
+[35m[1mScanning dependencies of target nodelet_generate_messages_eus[0m
+[  0%] Built target bond_generate_messages_eus
+[35m[1mScanning dependencies of target bond_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_cpp[0m
+[  0%] Built target bond_generate_messages_lisp
+[  0%] Built target nodelet_generate_messages_eus
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_eus[0m
+[35m[1mScanning dependencies of target std_msgs_generate_messages_cpp[0m
+[  0%] Built target bond_generate_messages_nodejs
+[  0%] Built target sensor_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_lisp[0m
+[  0%] Built target sensor_msgs_generate_messages_eus
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_nodejs[0m
+[  0%] Built target std_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_cpp[0m
+[35m[1mScanning dependencies of target sensor_msgs_generate_messages_py[0m
+[  0%] Built target sensor_msgs_generate_messages_nodejs
+[  0%] Built target sensor_msgs_generate_messages_lisp
+[35m[1mScanning dependencies of target std_msgs_generate_messages_nodejs[0m
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_py[0m
+[  0%] Built target sensor_msgs_generate_messages_py
+[35m[1mScanning dependencies of target ublox_msgs_generate_messages_nodejs[0m
+[  0%] Built target geometry_msgs_generate_messages_cpp
+[35m[1mScanning dependencies of target ublox_msgs_generate_messages_lisp[0m
+[  0%] Built target std_msgs_generate_messages_nodejs
+[  0%] Built target geometry_msgs_generate_messages_py
+[35m[1mScanning dependencies of target geometry_msgs_generate_messages_eus[0m
+[  0%] Built target ublox_msgs_generate_messages_nodejs
+[  0%] Built target ublox_msgs_generate_messages_lisp
+[  0%] Built target geometry_msgs_generate_messages_eus
+[  3%] [34m[1mGenerating src/moc_MapFrame.cpp[0m
+[  7%] [34m[1mGenerating qrc_resources.cpp[0m
+[ 10%] [34m[1mGenerating src/moc_rover_gui_plugin.cpp[0m
+[ 14%] [34m[1mGenerating src/moc_CameraFrame.cpp[0m
+[ 17%] [34m[1mGenerating ui_rover_gui_plugin.h[0m
+[ 21%] [34m[1mGenerating src/moc_USFrame.cpp[0m
+[ 28%] [34m[1mGenerating src/moc_GPSFrame.cpp[0m
+[ 28%] [34m[1mGenerating src/moc_JoystickGripperInterface.cpp[0m
+[ 32%] [34m[1mGenerating src/moc_IMUFrame.cpp[0m
+[35m[1mScanning dependencies of target rqt_rover_gui[0m
+[ 35%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/GazeboSimManager.cpp.o[0m
+[ 39%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/Version.cpp.o[0m
+[ 42%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/JoystickGripperInterface.cpp.o[0m
+[ 46%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/rover_gui_plugin.cpp.o[0m
+[ 53%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/MapFrame.cpp.o[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/CameraFrame.cpp.o[0m
+[ 57%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/USFrame.cpp.o[0m
+[ 60%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/GPSFrame.cpp.o[0m
+[ 64%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/MapData.cpp.o[0m
+[ 67%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/IMUFrame.cpp.o[0m
+[ 71%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/BWTabWidget.cpp.o[0m
+[ 75%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/moc_rover_gui_plugin.cpp.o[0m
+[ 78%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/moc_CameraFrame.cpp.o[0m
+[ 82%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/moc_MapFrame.cpp.o[0m
+[ 85%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/moc_USFrame.cpp.o[0m
+[ 89%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/moc_GPSFrame.cpp.o[0m
+[ 92%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/moc_IMUFrame.cpp.o[0m
+[ 96%] [32mBuilding CXX object CMakeFiles/rqt_rover_gui.dir/src/moc_JoystickGripperInterface.cpp.o[0m
+[100%] [32m[1mLinking CXX shared library /home/cspooner/Swarmathon-FSU/devel/.private/rqt_rover_gui/lib/librqt_rover_gui.so[0m
+[100%] Built target rqt_rover_gui
