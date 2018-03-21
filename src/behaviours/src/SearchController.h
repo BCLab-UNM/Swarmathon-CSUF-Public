@@ -4,6 +4,10 @@
 #include <random_numbers/random_numbers.h>
 #include "Controller.h"
 #include <cstdlib>
+#include <queue>
+#include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Twist.h>
+
 /**
  * This class implements the search control algorithm for the rovers. The code
  * here should be modified and enhanced to improve search performance.
@@ -22,11 +26,17 @@ public:
   bool HasWork() override;
 
   // sets the value of the current location
-  //void UpdateData(geometry_msgs::Pose2D currentLocation, geometry_msgs::Pose2D centerLocation);
+  void UpdateData(geometry_msgs::Pose2D currentLocation, geometry_msgs::Pose2D centerLocation);
   void SetCurrentLocation(Point currentLocation);
   void SetCenterLocation(Point centerLocation);
   void SetSuccesfullPickup();
+//declare cluster vars
+  float globalX;
+  float globalY;
+  queue <float> clusterX;
+  queue <float> clusterY;
 
+  
 protected:
 
   void ProcessData();
@@ -34,10 +44,11 @@ protected:
 private:
 
   random_numbers::RandomNumberGenerator* rng;
+ 
   Point currentLocation;
   Point centerLocation;
   Point searchLocation;
-  Point homeBase;
+  
   int attemptCount = 0;
   //struct for returning data to ROS adapter
   Result result;

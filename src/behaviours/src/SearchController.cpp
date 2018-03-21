@@ -3,6 +3,9 @@
 #include <array>
 #include <cstdlib>
 #include <ctime>
+#include <queue>
+#include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Twist.h>
 
 float locationCounter = 1;
 float locationCounterTwo = 1;
@@ -19,8 +22,7 @@ SearchController::SearchController()
   centerLocation.theta = 0;
   result.PIDMode = FAST_PID; result.fingerAngle = M_PI/2;
   result.wristAngle = M_PI/4;
-  //homeBase.x = 0;
-  //homeBase.y = 0;
+  centerLocation;
   }
 
 void SearchController::Reset() 
@@ -32,7 +34,13 @@ Result SearchController::DoWork()
   {
     //incase something crazy happens and the random number is not a case then default sends back to here: probably not needed
     jump:
+    float diffX = this->centerLocation.x - centerLocation.x;
+    float diffY = this->centerLocation.y - centerLocation.y;
+    this->centerLocation = centerLocation;  
     
+  
+    centerLocation.x = diffX;
+    centerLocation.y = diffY;
     //using a multidimensional array to randomize the pick for which search pattern to use
     int firstPick =  rand()%6;
     int secondPick = rand()%6;
@@ -49,8 +57,9 @@ Result SearchController::DoWork()
 
     Point  searchLocationOne, searchLocationTwo, searchLocationThree, searchLocationFour, 
            searchLocationFive, searchLocationSix, searchLocationSeven, searchLocationEight,
-           searchLocationNine, searchLocationTen, searchLocationEleven, searchLocationTwelve;
-           //searchLocationHome;
+           searchLocationNine, searchLocationTen, searchLocationEleven, searchLocationTwelve,
+	   searchLocationThirteen, searchCluster;
+           
 
     //cloverleaf pattern 1's x,y coordiantes
     int xSearchOne[] =   {0,   1,  4,  5,  4, 0};
@@ -70,9 +79,17 @@ Result SearchController::DoWork()
     //counter-clockwise spiral pattern 1's x,y coordiantes
     int xSearchSix[] =   {0, -2,  0, 2, 0, -4,  0, 4, 0, -6,  0, 6};
     int ySearchSix[] =   {2,  0, -2, 0, 4,  0, -4, 0, 6,  0, -6, 0};
-    //Set starting point
-    // homeBase.x = currentLocation.x;    
-    //homeBase.y = currentLocation.y;
+
+    if( ! clusterX.empty() && ! clusterY.empty())
+	{
+        searchCluster.x = centerLocation.x + clusterX.front();
+	searchCluster.y = centerLocation.y + clusterY.front();
+        clusterX.pop();
+        clusterY.pop();
+        result.wpts.waypoints.clear();
+        result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchCluster);
+	}
+
     switch(pattern)
       {
 
@@ -97,6 +114,9 @@ Result SearchController::DoWork()
     // Point 6 of search pattern
             searchLocationSix.x   = centerLocation.x +  xSearchOne[5] + locationCounter; 
             searchLocationSix.y   = centerLocation.y +  ySearchOne[5] + locationCounter;
+
+	    searchLocationSeven.x = centerLocation.x;
+	    searchLocationSeven.y = centerLocation.y;
     //Return to starting location
             //searchLocationHome.x = homeBase.x;
 	    //searchLocationHome.y = homeBase.y;
@@ -124,8 +144,8 @@ Result SearchController::DoWork()
             searchLocationSix.x   = centerLocation.x +  xSearchTwo[5] + locationCounter; 
             searchLocationSix.y   = centerLocation.y +  ySearchTwo[5] + locationCounter; 
     //Return to starting location
-            //searchLocationHome.x = homeBase.x;
-	    //searchLocationHome.y = homeBase.y;
+	    searchLocationSeven.x = centerLocation.x;
+	    searchLocationSeven.y = centerLocation.y;
 	    break;
 
         case 3:
@@ -150,8 +170,8 @@ Result SearchController::DoWork()
             searchLocationSix.x   = centerLocation.x +  xSearchThree[5] + locationCounter; 
             searchLocationSix.y   = centerLocation.y +  ySearchThree[5] + locationCounter; 
     //Return to starting location
-            //searchLocationHome.x = homeBase.x;
-	    //searchLocationHome.y = homeBase.y;
+	    searchLocationSeven.x = centerLocation.x;
+	    searchLocationSeven.y = centerLocation.y;
 	    break;
 
         case 4:
@@ -176,8 +196,8 @@ Result SearchController::DoWork()
             searchLocationSix.x   = centerLocation.x +  xSearchFour[5] + locationCounter; 
             searchLocationSix.y   = centerLocation.y +  ySearchFour[5] + locationCounter; 
     //Return to starting location
-            //searchLocationHome.x = homeBase.x;
-	    //searchLocationHome.y = homeBase.y;
+	    searchLocationSeven.x = centerLocation.x;
+	    searchLocationSeven.y = centerLocation.y;
 	    break;
 
 	case 5:
@@ -220,8 +240,8 @@ Result SearchController::DoWork()
             searchLocationTwelve.x = centerLocation.x +  xSearchFive[11] + locationCounterTwo; 
 	    searchLocationTwelve.y = centerLocation.y +  ySearchFive[11] + locationCounterTwo;
     //Return to starting location
-            //searchLocationHome.x = homeBase.x;
-	    //searchLocationHome.y = homeBase.y;
+	    searchLocationThirteen.x = centerLocation.x;
+	    searchLocationThirteen.y = centerLocation.y;
 	    break;
 
 	case 6:
@@ -264,8 +284,8 @@ Result SearchController::DoWork()
             searchLocationTwelve.x = centerLocation.x +  xSearchSix[11] + locationCounterTwo; 
 	    searchLocationTwelve.y = centerLocation.y +  ySearchSix[11] + locationCounterTwo;
     //Return to starting location
-            //searchLocationHome.x = homeBase.x;
-	    //searchLocationHome.y = homeBase.y;
+	    searchLocationThirteen.x = centerLocation.x;
+	    searchLocationThirteen.y = centerLocation.y;
 	    break;
 
         default:
@@ -284,7 +304,7 @@ Result SearchController::DoWork()
       {
       locationCounter = 1;
       }
-    if (locationCounterTwo >= 13)
+    if (locationCounterTwo >= 14)
       {
       locationCounter = 1;
       }
@@ -304,7 +324,7 @@ Result SearchController::DoWork()
     result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocationTen);
     result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocationEleven);
     result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocationTwelve);
-    //result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocationHome);  
+    result.wpts.waypoints.insert(result.wpts.waypoints.begin(), searchLocationThirteen);  
     // Return result will send 'result' to the ROSAdapter which will then execute
     //    Whatever its told by result.
     return result;
@@ -324,6 +344,7 @@ void SearchController::SetCurrentLocation(Point currentLocation)
   {
   this->currentLocation = currentLocation;
   }
+
 void SearchController::ProcessData()
   {
   }

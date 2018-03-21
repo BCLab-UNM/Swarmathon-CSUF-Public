@@ -3,6 +3,9 @@
 
 #include "Controller.h"
 #include "Tag.h"
+#include <queue>
+#include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Twist.h>
 
 class PickUpController : virtual Controller
 {
@@ -27,12 +30,18 @@ public:
   // needed because ultrasound data is used to determine whether a
   // block has been successfully picked up.
   void SetUltraSoundData(bool blockBlock);
-
+ 
   bool GetIgnoreCenter() {return ignoreCenterSonar;}
   bool GetTargetHeld() {return targetHeld;}
-
   void SetCurrentTimeInMilliSecs( long int time );
-
+//declare cluster vars
+  float globalX;
+  float globalY;
+  queue <float> clusterX;
+  queue <float> clusterY;
+  Point clusterLocation;
+  Point currentCluster;
+  Point currentLocation;
 protected:
 
   void ProcessData();
@@ -45,7 +54,9 @@ private:
 
   bool targetFound;
   bool targetHeld;
-
+//new code making a cluster point to return to
+  
+  
   // Failsafe state. No legitimate behavior state. If in this state for too long return to searching as default behavior.
   bool timeOut;
   int nTargetsSeen;

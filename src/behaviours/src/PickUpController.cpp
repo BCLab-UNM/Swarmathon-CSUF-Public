@@ -1,6 +1,9 @@
 #include "PickUpController.h"
 #include <limits> // For numeric limits
 #include <cmath> // For hypot
+#include <queue>
+#include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Twist.h>
 
 PickUpController::PickUpController()
 {
@@ -9,25 +12,33 @@ PickUpController::PickUpController()
   nTargetsSeen = 0;
   blockYawError = 0;
   blockDistance = 0;
-
   targetFound = false;
-
   result.type = precisionDriving;
   result.pd.cmdVel = 0;
   result.pd.cmdAngularError= 0;
   result.fingerAngle = -1;
   result.wristAngle = -1;
   result.PIDMode = SLOW_PID;
+  float globalX;
+  float globalY;
+  queue <float> clusterX;
+  queue <float> clusterY;
+  clusterLocation.x = 0;
+  clusterLocation.y = 0;
+  currentCluster.x = 0;
+  currentCluster.y = 0;
+  currentLocation;
 }
+
 
 PickUpController::~PickUpController() { /*Destructor*/  }
 
 void PickUpController::SetTagData(vector<Tag> tags)
 {
-
+  
   if (tags.size() > 0)
   {
-
+    
     nTargetsSeen = tags.size();
 
     //we saw a target, set target_timer
@@ -38,39 +49,47 @@ void PickUpController::SetTagData(vector<Tag> tags)
 
     //this loop selects the closest visible block to makes goals for it
     for (int i = 0; i < tags.size(); i++)
-    {
-
-      if (tags[i].getID() == 0)
       {
 
+      //int j,k = 0;
+      if (tags[i].getID() == 0)
+        {
         targetFound = true;
-
         //absolute distance to block from camera lens
         double test = hypot(hypot(tags[i].getPositionX(), tags[i].getPositionY()), tags[i].getPositionZ());
-
         if (closest > test)
-        {
+          {
           target = i;
           closest = test;
+         //newcode
+            if(tags.size() > 1)
+              {
+	      this->currentLocation = currentLocation;
+              clusterLocation.x = this->currentLocation.x - currentLocation.x;
+              clusterLocation.y = this->currentLocation.x - currentLocation.x;
+              clusterX.push(clusterLocation.x);
+              clusterY.push(clusterLocation.y);
+	      
+               }
+            }
+//endofnewcode
         }
-      }
       else
-      {
+        {
         // If the center is seen, then don't try to pick up the cube.
         if(tags[i].getID() == 256)
-        {
+          {
 
           Reset();
 
           if (has_control)
-          {
+            {
             cout << "pickup reset return interupt free" << endl;
             release_control = true;
-          }
-
+            }
           return;
+          }
         }
-      }
     }
 
     float cameraOffsetCorrection = 0.023; //meters;
@@ -84,14 +103,14 @@ void PickUpController::SetTagData(vector<Tag> tags)
     blockDistanceFromCamera = hypot(hypot(tags[target].getPositionX(), tags[target].getPositionY()), tags[target].getPositionZ());
 
     if ( (blockDistanceFromCamera*blockDistanceFromCamera - 0.195*0.195) > 0 )
-    {
+      {
       blockDistance = sqrt(blockDistanceFromCamera*blockDistanceFromCamera - 0.195*0.195);
-    }
+      }
     else
-    {
+      {
       float epsilon = 0.00001; // A small non-zero positive number
       blockDistance = epsilon;
-    }
+      }
 
     //cout << "blockDistance  TAGDATA:  " << blockDistance << endl;
 
@@ -105,21 +124,21 @@ void PickUpController::SetTagData(vector<Tag> tags)
 
 
 bool PickUpController::SetSonarData(float rangeCenter)
-{
+  {
   // If the center ultrasound sensor is blocked by a very close
   // object, then a cube has been successfully lifted.
   if (rangeCenter < 0.12 && targetFound)
-  {
+    {
     result.type = behavior;
     result.b = nextProcess;
     result.reset = true;
     targetHeld = true;
     return true;
-  }
+    }
 
   return false;
 
-}
+  }
 
 void PickUpController::ProcessData()
 {
@@ -162,44 +181,40 @@ void PickUpController::ProcessData()
 }
 
 
-bool PickUpController::ShouldInterrupt(){
-
+bool PickUpController::ShouldInterrupt()
+  {
   ProcessData();
-
   // saw center tags, so don't try to pick up the cube.
   if (release_control)
-  {
+    {
     release_control = false;
     has_control = false;
     return true;
-  }
-
+    }
   if ((targetFound && !interupted) || targetHeld)
-  {
+    {
     interupted = true;
     has_control = false;
     return true;
-  }
+    }
   else if (!targetFound && interupted)
-  {
+    {
     // had a cube in sight but lost it, interrupt again to release control
     interupted = false;
     has_control = false;
     return true;
-  }
+    }
   else
-  {
+    {
     return false;
+    }
   }
-}
 
 Result PickUpController::DoWork()
 {
-
   has_control = true;
-
   if (!targetHeld)
-  {
+    {
     //threshold distance to be from the target block before attempting pickup
     float targetDistance = 0.15; //meters
 
@@ -256,10 +271,10 @@ Result PickUpController::DoWork()
 
     //Timer to deal with delay in refresh from camera and the runtime of rover code
     if( target_timeout >= target_timeout_limit )
-    {
+      {
         //Has to be set back to 0
         nTargetsSeen = 0;
-    }
+      }
 
     
     if (nTargetsSeen == 0 && !lockTarget)
@@ -355,13 +370,9 @@ Result PickUpController::DoWork()
   return result;
 }
 
-bool PickUpController::HasWork()
-{
-  return targetFound;
-}
-
-void PickUpController::Reset() {
-
+bool PickUpController::HasWork(){return targetFound;}
+void PickUpController::Reset() 
+  {
   result.type = precisionDriving;
   result.PIDMode = SLOW_PID;
   lockTarget = false;
@@ -381,13 +392,19 @@ void PickUpController::Reset() {
   result.reset = false;
 
   ignoreCenterSonar = false;
-}
+  }
 
-void PickUpController::SetUltraSoundData(bool blockBlock){
+void PickUpController::SetUltraSoundData(bool blockBlock)
+  {
   this->blockBlock = blockBlock;
-}
-
+  }
 void PickUpController::SetCurrentTimeInMilliSecs( long int time )
-{
+  {
   current_time = time;
-}
+  }
+
+
+
+
+
+
