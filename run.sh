@@ -1,5 +1,6 @@
 #!/bin/bash
-echo "Running in $PWD" 
+echo "Running in $PWD"
+#stupid comment so maybe I can update it
 previous_gazebo_model_path=${GAZEBO_MODEL_PATH}
 previous_gazebo_plugin_path=${GAZEBO_PLUGIN_PATH}
 export SWARMATHON_APP_ROOT="$PWD"
