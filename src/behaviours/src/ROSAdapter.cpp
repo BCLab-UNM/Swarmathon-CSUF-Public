@@ -172,7 +172,7 @@ void mapHandler(const nav_msgs::Odometry::ConstPtr& message);				//receives and 
 void virtualFenceHandler(const std_msgs::Float32MultiArray& message);			//Used to set an invisible boundary for robots to keep them from traveling outside specific bounds
 void manualWaypointHandler(const swarmie_msgs::Waypoint& message);			//Receives a waypoint (from GUI) and sets the coordinates
 void behaviourStateMachine(const ros::TimerEvent&);					//Upper most state machine, calls logic controller to perform all actions
-void publishStatusTimerEventHandler(const ros::TimerEvent& event);			//Publishes "UNC-FSU: Go Broncos!" when rover is successfully connected
+void publishStatusTimerEventHandler(const ros::TimerEvent& event);			//Publishes "Fayetteville State University: Go Broncos!" when rover is successfully connected
 void publishHeartBeatTimerEventHandler(const ros::TimerEvent& event);			
 void sonarHandler(const sensor_msgs::Range::ConstPtr& sonarLeft, const sensor_msgs::Range::ConstPtr& sonarCenter, const sensor_msgs::Range::ConstPtr& sonarRight);	//handles ultrasound data and stores data
 
@@ -611,7 +611,7 @@ void joyCmdHandler(const sensor_msgs::Joy::ConstPtr& message) {
 
 void publishStatusTimerEventHandler(const ros::TimerEvent&) {
   std_msgs::String msg;
-  msg.data = "UNC-FSU: Go Broncos!";		//change this with team name
+  msg.data = "Fayetteville State University: Go Broncos!";		//change this with team name
   status_publisher.publish(msg);
 }
 
