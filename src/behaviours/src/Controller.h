@@ -2,7 +2,9 @@
 #define CONTROLLER_H
 
 #include "Result.h"
-
+#include <queue>
+#include <geometry_msgs/Pose2D.h>
+#include <geometry_msgs/Twist.h>
 /*
  * This class is meant to serve as a template for all Controllers,
  * including new Controllers defined by each team.
@@ -28,11 +30,16 @@ public:
   //Returns whether or not a controller should be polled for a Result
   virtual bool HasWork() = 0;
 
+
 protected:
 
   //Looks at external data and determines if an interrupt must be thrown
   //or if the controller should be polled
   virtual void ProcessData() = 0;
 };
-
+//create location and queue for location variables for a clustered target
+  extern float globalX;
+  extern float globalY;
+  extern queue <float> clusterX;
+  extern queue <float> clusterY;
 #endif // CONTROLLER_H
